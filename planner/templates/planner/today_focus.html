@@ -1,0 +1,74 @@
+{% extends 'planner/base.html' %}
+{% block content %}
+
+<h1>🎯 Personalized Daily Focus</h1>
+<p class="subtitle">The Study Planner Agent analyzes your recent progress, quiz attempts, and upcoming exams to optimize today's focus.</p>
+
+{% if missed_tasks %}
+<div class="card" style="background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.2); margin-bottom: 32px;">
+    <h3 style="color: #fda4af; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+        ⚠️ Attention: Missed Study Tasks
+    </h3>
+    <p style="font-size: 14.5px; color: var(--text-muted); margin-bottom: 16px;">You have incomplete tasks from the last few days. The agent has accounted for these in today's recommendation:</p>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        {% for task in missed_tasks %}
+        <div style="font-size: 14px; padding: 12px 16px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(244, 63, 94, 0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <span style="line-height: 1.5; color: var(--text-main);">
+                <strong style="color: #fda4af;">{{ task.subject.name }}</strong> 
+                <span style="color: var(--text-muted); font-size: 13px; margin: 0 4px;">(Scheduled: {{ task.date }})</span>: 
+                {{ task.task_description }}
+            </span>
+            <a href="{% url 'mark_complete' task.id %}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; box-shadow: none;">Mark Done</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="grid-2" style="align-items: start;">
+    <div>
+        <div class="card" style="border-left: 4px solid var(--secondary); display: flex; flex-direction: column; max-height: 75vh;">
+            <h2 style="font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-weight: 700; color: var(--text-main);">
+                🤖 Agent Coach Analysis
+            </h2>
+            
+            <div class="markdown-content premium-scroll" data-markdown="{{ recommendation.recommendation_text }}" style="overflow-y: auto; flex-grow: 1; padding-right: 8px; min-height: 200px;">
+                {{ recommendation.recommendation_text }}
+            </div>
+            
+            <div style="flex-shrink: 0; padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 16px;">
+                <a href="?regenerate=true" class="btn" style="background: linear-gradient(135deg, var(--secondary) 0%, #4f46e5 100%); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); width: 100%;">
+                    🔄 Recalculate Recommendations
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card" style="border-left: 4px solid var(--primary);">
+            <h2 style="font-size: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-main);">
+                📝 Adjusted Task Checklist
+            </h2>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Use these tailored tasks generated dynamically for you today:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                {% if recommendation.adjusted_tasks %}
+                    {% for task in recommendation.adjusted_tasks %}
+                    <div class="task-item" style="padding: 14px 0;">
+                        <div style="display: flex; align-items: flex-start; gap: 12px; line-height: 1.5;">
+                            <span style="color: var(--primary); font-size: 16px; line-height: 1.2;">➔</span>
+                            <span style="font-weight: 500; font-size: 15px; color: var(--text-main);">{{ task }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty" style="padding: 24px 0;">No tasks generated. Ensure you have added subjects and generated an active plan.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <a href="{% url 'home' %}" class="btn btn-secondary" style="width: 100%;">← Back to Home Plan</a>
+    </div>
+</div>
+
+{% endblock %}

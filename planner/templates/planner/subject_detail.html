@@ -1,0 +1,30 @@
+{% extends 'planner/base.html' %}
+{% block content %}
+
+<div style="max-width: 750px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <h1 style="margin-bottom: 0;">{{ subject.name }}</h1>
+        <span class="badge {{ subject.difficulty }}" style="font-size: 13px; padding: 6px 14px;">
+            {{ subject.difficulty }}
+        </span>
+    </div>
+    
+    <p class="subtitle" style="margin-bottom: 28px;">📅 Exam Date: <strong style="color: var(--text-main);">{{ subject.exam_date }}</strong></p>
+
+    <div class="card" style="border-left: 4px solid var(--secondary); background: rgba(99, 102, 241, 0.03); padding: 32px;">
+        <h2 style="font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-main);">
+            📚 Syllabus & Focus Topics
+        </h2>
+        {% if subject.syllabus %}
+            <div style="font-size: 15.5px; line-height: 1.8; color: var(--text-main); white-space: pre-line;">{{ subject.syllabus }}</div>
+        {% else %}
+            <p class="empty" style="padding: 24px 0;">No syllabus topics specified for this subject.</p>
+        {% endif %}
+    </div>
+
+    <div class="actions" style="margin-top: 28px;">
+        <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home Plan</a>
+    </div>
+</div>
+
+{% endblock %}

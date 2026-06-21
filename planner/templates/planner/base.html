@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner Agent</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(17, 24, 39, 0.45);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #10b981; /* Emerald */
+            --primary-hover: #34d399;
+            --secondary: #6366f1; /* Indigo */
+            --secondary-hover: #818cf8;
+            --danger: #f43f5e;
+            --danger-hover: #fb7185;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-color) 70%);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        nav {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .brand {
+            font-weight: 700;
+            font-size: 22px;
+            background: linear-gradient(to right, #10b981, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 6px 0;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--text-main);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after, nav a.active::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #059669 100%);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, var(--primary-hover) 0%, #10b981 100%);
+        }
+
+        .btn:active {
+            transform: translateY(-0.5px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #be123c 100%);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
+            background: linear-gradient(135deg, var(--danger-hover) 0%, var(--danger) 100%);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            margin-bottom: 18px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            transform: translateY(-1px);
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.hard { background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.25); }
+        .badge.medium { background: rgba(245, 158, 11, 0.15); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .badge.easy { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.25); }
+
+        .messages {
+            margin-bottom: 24px;
+            list-style: none;
+        }
+
+        .messages li {
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .messages li.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .empty {
+            color: var(--text-muted);
+            font-size: 15px;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Accordion for Why Important details */
+        details {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        details summary {
+            font-size: 13.5px;
+            color: var(--secondary-hover);
+            cursor: pointer;
+            font-weight: 600;
+            outline: none;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        details summary:hover {
+            color: #a5b4fc;
+        }
+
+        details .details-content {
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--secondary);
+            border-radius: 4px;
+            font-size: 14.5px;
+            color: var(--text-muted);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+            margin: 14px 0;
+            border: 1px solid var(--card-border);
+        }
+
+        .progress-bar {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Markdown Content Styling */
+        .markdown-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-main);
+        }
+        .markdown-content p {
+            margin-bottom: 14px;
+        }
+        .markdown-content p:last-child {
+            margin-bottom: 0;
+        }
+        .markdown-content strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #ffffff;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            background: none;
+            -webkit-text-fill-color: initial;
+            line-height: 1.4;
+        }
+        .markdown-content h1 { font-size: 20px; }
+        .markdown-content h2 { font-size: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 4px; }
+        .markdown-content h3 { font-size: 16px; }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+        .markdown-content li {
+            margin-bottom: 8px;
+        }
+        .markdown-content blockquote {
+            border-left: 3px solid var(--secondary);
+            background: rgba(99, 102, 241, 0.05);
+            padding: 10px 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+        .markdown-content code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            color: #fda4af;
+        }
+        .markdown-content pre {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .markdown-content pre code {
+            padding: 0;
+            background: transparent;
+            font-size: 13px;
+            color: #e2e8f0;
+        }
+
+        /* Custom Scrollbar for all overflow-y scrollable items */
+        .premium-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        }
+        .premium-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .premium-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .premium-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        .premium-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="brand">📚 Study Planner Agent</span>
+        <div class="nav-links">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'today_focus' %}">Today's Focus</a>
+            <a href="{% url 'quiz_me' %}">Quiz Me</a>
+            <a href="{% url 'ask_agent' %}">Ask Agent</a>
+            <a href="{% url 'plan_history' %}">Plan History</a>
+        </div>
+    </nav>
+    <div class="container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Markdown library and active navigation parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Custom Markdown parsing function with fallback
+        function renderMarkdown(text) {
+            if (window.marked && typeof window.marked.parse === 'function') {
+                return window.marked.parse(text);
+            }
+            
+            // Fallback parser: Basic regex-based markdown parser
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            
+            // Bold **text**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Headings ### heading
+            html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+            
+            // Bullet points
+            html = html.split('\n').map(line => {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ')) {
+                    return `<li>${trimmed.substring(2)}</li>`;
+                }
+                if (trimmed.startsWith('* ')) {
+                    return `<li>${trimmed.substring(2)}</li>`;
+                }
+                return line;
+            }).join('\n');
+            
+            // Wrap bullet items in lists (simple wrap)
+            html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            
+            // Code block ```code```
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Inline code `code`
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            // Newlines to breaks for regular text
+            html = html.split('\n\n').map(p => {
+                const pt = p.trim();
+                if (!pt.startsWith('<h') && !pt.startsWith('<ul') && !pt.startsWith('<li') && !pt.startsWith('<pre') && !pt.startsWith('</pre>')) {
+                    return `<p>${pt.replace(/\n/g, '<br>')}</p>`;
+                }
+                return pt;
+            }).join('\n');
+            
+            return html;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Render all elements marked with class "markdown-content"
+            document.querySelectorAll('.markdown-content').forEach(el => {
+                const rawText = el.getAttribute('data-markdown') || el.innerText;
+                el.innerHTML = renderMarkdown(rawText);
+                el.style.display = 'block'; // Ensure visibility
+            });
+
+            // 2. Active nav link highlighting
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll("nav a");
+            navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href) {
+                    if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+                        link.classList.add("active");
+                    } else if (href === '/' && currentPath === '/') {
+                        link.classList.add("active");
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

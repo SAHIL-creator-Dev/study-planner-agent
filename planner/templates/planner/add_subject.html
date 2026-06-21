@@ -1,0 +1,44 @@
+{% extends 'planner/base.html' %}
+{% block content %}
+
+<div style="max-width: 600px; margin: 0 auto;">
+    <h1>Add a New Subject</h1>
+    <p class="subtitle">Enter subject details to include it in the agent's planning algorithm.</p>
+    
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label for="name">Subject Name</label>
+                <input type="text" id="name" name="name" placeholder="e.g. Data Structures & Algorithms" required>
+            </div>
+    
+            <div style="margin-bottom: 20px;">
+                <label for="exam_date">Exam Date</label>
+                <input type="date" id="exam_date" name="exam_date" required>
+            </div>
+    
+            <div style="margin-bottom: 20px;">
+                <label for="difficulty">Difficulty Level</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="easy">Easy (Requires minimal revision)</option>
+                    <option value="medium" selected>Medium (Standard focus)</option>
+                    <option value="hard">Hard (Requires intensive focus)</option>
+                </select>
+            </div>
+    
+            <div style="margin-bottom: 24px;">
+                <label for="syllabus">Syllabus / Focus Topics</label>
+                <textarea id="syllabus" name="syllabus" placeholder="e.g. OSI Layers, TCP/IP Protocols, Routing Algorithms (optional, comma-separated or one per line)" rows="5"></textarea>
+            </div>
+    
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button type="submit" class="btn">Add Subject</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

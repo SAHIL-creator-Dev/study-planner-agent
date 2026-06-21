@@ -1,0 +1,66 @@
+{% extends 'planner/base.html' %}
+{% block content %}
+
+<h1>🧠 AI Quiz Coach</h1>
+<p class="subtitle">Select a subject and optionally a subtopic, and the Study Agent will create a custom 3-question MCQ quiz to test your memory.</p>
+
+<div class="grid-2" style="align-items: start;">
+    <div>
+        <div class="card">
+            <h2 style="font-size: 20px; margin-bottom: 20px; font-weight: 700; color: var(--text-main);">Generate a New Quiz</h2>
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="subject">Choose Subject</label>
+                    <select id="subject" name="subject" required>
+                        {% for s in subjects %}
+                        <option value="{{ s.name }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+        
+                <div style="margin-bottom: 24px;">
+                    <label for="topic">Focus Topic (optional)</label>
+                    <input type="text" id="topic" name="topic" placeholder="e.g. Recursion, Thermodynamics, Photosynthesis">
+                </div>
+        
+                <button type="submit" class="btn" style="width: 100%;">🤖 Generate & Start Quiz</button>
+            </form>
+        </div>
+        
+        <a href="{% url 'home' %}" class="btn btn-secondary" style="width: 100%;">← Back to Home Plan</a>
+    </div>
+
+    <div>
+        <h2 style="font-size: 20px; margin-bottom: 16px; font-weight: 700; color: var(--text-main);">Past Quiz Performance</h2>
+        <div class="card" style="display: flex; flex-direction: column; max-height: 60vh;">
+            <div class="premium-scroll" style="overflow-y: auto; padding-right: 8px;">
+                {% if attempts %}
+                    {% for attempt in attempts %}
+                    <div class="task-item" style="padding: 16px 0;">
+                        <div>
+                            <strong style="color: var(--secondary-hover); font-size: 16px;">{{ attempt.quiz.subject.name }}</strong>
+                            <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 6px;">
+                                Topic: {{ attempt.quiz.topic|default:"General" }} <span style="margin: 0 4px;">•</span> {{ attempt.attempted_at|date:"M d, Y H:i" }}
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+                            <span class="badge {% if attempt.score == attempt.total_questions %}easy{% elif attempt.score > 0 %}medium{% else %}hard{% endif %}" style="font-size: 12px; padding: 6px 12px;">
+                                Score: {{ attempt.score }}/{{ attempt.total_questions }}
+                            </span>
+                            <a href="{% url 'quiz_result' attempt.id %}" class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px; border-radius: 8px; box-shadow: none;">
+                                Details
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty" style="padding: 24px 0;">No quiz attempts recorded yet. Challenge yourself by generating a quiz!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

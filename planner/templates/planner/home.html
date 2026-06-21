@@ -1,0 +1,97 @@
+{% extends 'planner/base.html' %}
+{% block content %}
+
+<div class="grid-2" style="align-items: start;">
+    <div>
+        <h1>Your Subjects</h1>
+        <p class="subtitle">Add your exam subjects and dates, then generate a structured, prioritized plan.</p>
+        
+        <div class="card">
+            {% if subjects %}
+                {% for s in subjects %}
+                <div class="task-item">
+                    <div>
+                        <strong style="font-size: 16px; color: var(--text-main);">{{ s.name }}</strong>
+                        <span class="badge {{ s.difficulty }}" style="margin-left: 8px;">{{ s.difficulty }}</span>
+                        <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                            📅 Exam: {{ s.exam_date }}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        {% if s.syllabus %}
+                        <a href="{% url 'subject_detail' s.id %}" class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px; border-radius: 8px;">
+                            Syllabus
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'delete_subject' s.id %}" class="btn btn-secondary btn-danger" style="padding: 8px 14px; font-size: 13px; border-radius: 8px; color: white;" onclick="return confirm('Are you sure you want to delete this subject?');">
+                            Remove
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty">No subjects added yet. Start by adding a subject below!</p>
+            {% endif %}
+        </div>
+        
+        <div class="actions">
+            <a href="{% url 'add_subject' %}" class="btn">+ Add Subject</a>
+            <a href="{% url 'generate_plan' %}" class="btn btn-secondary">🤖 Generate Study Plan</a>
+            <a href="{% url 'plan_history' %}" class="btn btn-secondary">📁 View Plans History</a>
+        </div>
+    </div>
+
+    <div>
+        <h1>Today's Plan Progress</h1>
+        <p class="subtitle">
+            {% if active_plan %}
+                Active Plan: {{ active_plan.start_date }} to {{ active_plan.end_date }}
+            {% else %}
+                No active study plan. Generate one to see today's tasks!
+            {% endif %}
+        </p>
+
+        {% if active_plan %}
+        <div class="card" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14.5px; margin-bottom: 8px;">
+                <span>Daily Completion</span>
+                <span style="color: var(--primary);">{{ percent_completed }}%</span>
+            </div>
+            <div class="progress-container" style="margin: 8px 0 0 0;">
+                <div class="progress-bar" style="width: {{ percent_completed }}%;"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <h2 style="margin-bottom: 16px; font-size: 22px; font-weight: 700; color: var(--text-main);">Today's Tasks</h2>
+        <div class="card">
+            {% if today_tasks %}
+                {% for t in today_tasks %}
+                <div class="task-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; gap: 16px;">
+                        <div style="line-height: 1.5;">
+                            <strong style="color: var(--primary); font-size: 16px;">{{ t.subject.name }}</strong>
+                            <span style="color: var(--text-main); margin-left: 6px; font-weight: 500; {% if t.is_completed %}text-decoration: line-through; color: var(--text-muted); opacity: 0.65;{% endif %}">— {{ t.task_description }}</span>
+                        </div>
+                        <a href="{% url 'mark_complete' t.id %}" class="btn {% if t.is_completed %}btn-secondary{% endif %}" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; font-weight: 600; box-shadow: none; flex-shrink: 0;">
+                            {% if t.is_completed %}✅ Done{% else %}Mark Done{% endif %}
+                        </a>
+                    </div>
+                    {% if t.why_important %}
+                    <details>
+                        <summary>Why this task is important</summary>
+                        <div class="details-content">
+                            {{ t.why_important }}
+                        </div>
+                    </details>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty">No tasks scheduled for today. Make sure to generate a study plan, or check back tomorrow!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
